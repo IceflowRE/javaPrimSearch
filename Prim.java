@@ -12,7 +12,7 @@ import java.io.*;
 public class Prim {
 	public static void main(String[] args) throws IOException {
 		String dir = "data";
-		String file = "Primzahlen.txt";
+		String file = "primes.txt";
 
 
 		if (checkDir(dir + "/" + file)) {
@@ -111,7 +111,7 @@ public class Prim {
 		}
 		status = 1;
 		} catch (Exception e) {
-			System.out.println("Fehler beim einlesen des Pfades");
+			System.out.println("Error");
 			System.exit(0);
 		}
 		return new double[] {correctPrim, biggestPrim, status};
@@ -122,7 +122,7 @@ public class Prim {
 		return ;
 	}
 
-	public static int JOptionDialog(String ueberschrift, String hinweis, int message, Object[] options) {
-		return JOptionPane.showOptionDialog(null, hinweis, ueberschrift, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
+	public static int JOptionDialog(String title, String hint, int message, Object[] options) {
+		return JOptionPane.showOptionDialog(null, hint, title, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
 	}
 }
