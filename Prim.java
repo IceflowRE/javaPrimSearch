@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import javax.swing.JOptionPane;
 
 public class Prim {
@@ -57,7 +58,7 @@ public class Prim {
 				}  
 				upTo = Long.parseLong(input);
 				if (upTo >= 2) {
-					upTo = stats[1] + upTo;
+					upTo = (stats[1] + upTo);
 					inputIsCorrect = true;	
 				}
 			} catch (NumberFormatException e) {
@@ -72,7 +73,7 @@ public class Prim {
 		}
 		try {
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(primStorage, true));
-			for (long curTest = biggestPrim; (biggestPrim + curTest) <= upTo; curTest += 2) { //biggestPrim + 2, because you dont want to test the biggest prim again
+			for (long curTest = biggestPrim; curTest <= upTo; curTest += 2) { //biggestPrim + 2, because you dont want to test the biggest prim again
 				if (isPrimWithList(curTest, primStorage) == true) {
 					bWriter.write(curTest + "\n");
 					bWriter.flush();
@@ -83,7 +84,7 @@ public class Prim {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		
+		System.out.println("DONE: calculating primes until " + upTo);
 	}
 
 	public static boolean createDir(String dir, String file) throws IOException {
