@@ -49,8 +49,10 @@ public class Prim {
 	public static boolean createDir(String dir, String file) throws IOException {
 		File dirFile = new File(dir);
 		File fileFile = new File(dir + "/" + file);
-		if (!dirFile.mkdir()) {
-			return false;
+		if (!dirFile.exists()) { 
+			if (!dirFile.mkdir()) {
+				return false;
+			}
 		}
 		fileFile.createNewFile();
 		//add first prim 2
