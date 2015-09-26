@@ -38,7 +38,7 @@ public class Prim {
 		} //end error handling
 		long[] stats = fastCheckPrimList(dir + "/" + file); //fastlistcheck
 		if (stats[2] < 0) { //work with the fastcheck result
-			System.out.println("FAILED: fast primeslist check" + "at prim: " + stats[1] + " (line: " + stats[0] + ")");
+			System.out.println("FAILED: fast primeslist check (error line: " + (stats[0] + 1) + ")");
 			if ( repairPrimList(stats, dir, file) == false) {
 				System.out.println("FAILED: primelist recreating/ repairing");
 				System.exit(0);
@@ -47,8 +47,43 @@ public class Prim {
 		} else {
 			System.out.println("DONE: fast primeslist check");
 		}
+		long upTo = 0;
+		boolean inputIsCorrect = false;
+		while (!inputIsCorrect) {
+			try {
+				String input = JOptionPane.showInputDialog("Search from " + stats[1] + " up to X more numbers (bigger as 2)");
+				if (input == null) {
+					System.exit(0);
+				}  
+				upTo = Long.parseLong(input);
+				if (upTo >= 2) {
+					upTo = stats[1] + upTo;
+					inputIsCorrect = true;	
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Wrong input (or value to big)");
+			}
+		}
+		long biggestPrim = stats[1];
+		if (biggestPrim == 2) { //prevent testing number 4
+			biggestPrim = 3;
+		} else { //prevent testing the same Prim again
+			biggestPrim = biggestPrim + 2;
+		}
+		try {
+			BufferedWriter bWriter = new BufferedWriter(new FileWriter(primStorage, true));
+			for (long curTest = biggestPrim; (biggestPrim + curTest) <= upTo; curTest += 2) { //biggestPrim + 2, because you dont want to test the biggest prim again
+				if (isPrimWithList(curTest, primStorage) == true) {
+					bWriter.write(curTest + "\n");
+					bWriter.flush();
+				}
+			}
+			bWriter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 		
-		JOptionPane.showInputDialog("Suche von " + stats[1] + " um X Zahlen weiter:");
 	}
 
 	public static boolean createDir(String dir, String file) throws IOException {
@@ -65,7 +100,7 @@ public class Prim {
 			//add first prim 2
 			FileWriter fw = new FileWriter(fileFile);
 			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write("2" + "\n");
+			bw.write("2" + "\n" + "3" + "\n");
 			bw.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -82,10 +117,15 @@ public class Prim {
 				bRead.close();
 				return new long[] {correctPrim, biggestPrim, -2};
 			}
-			biggestPrim = 2;
-			for (correctPrim = 1; (curLine = bRead.readLine()) != null; correctPrim++) { //check if everything is ok
+			curLine = bRead.readLine();
+			if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != 3)) {//second check
+				bRead.close();
+				return new long[] {correctPrim, biggestPrim, -2};
+			} 
+			biggestPrim = 3;
+			for (correctPrim = 2; (curLine = bRead.readLine()) != null; correctPrim++) { //check if everything is ok
 				curPrim = Long.parseLong(curLine);
-				if (curPrim > biggestPrim) { //main check
+				if (curPrim > biggestPrim && (curPrim % 2 == 1)) { //main check
 					biggestPrim = curPrim;
 				} else { //if one next prim is smaller or equal as an previous its an error
 					bRead.close();
@@ -94,12 +134,10 @@ public class Prim {
 			}
 			bRead.close();
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
+			return new long[] {correctPrim, biggestPrim, -1};
 		}
 		return new long[] {correctPrim, biggestPrim, 1};
 	}
-
 	private static boolean repairPrimList(long[] stats, String dir, String file) {
 		int choosen_temp;
 		String statusStr = stats[2] + "";
@@ -129,13 +167,12 @@ public class Prim {
 					try {
 						BufferedReader bRead = new BufferedReader(new FileReader(primStorage));
 						BufferedWriter bWrite = new BufferedWriter(new FileWriter(copyTemp));
-						System.out.println(stats[0]);
 						int progress = 0;
-						double corPrimDou = (double) stats[0];
+						double corPrimDou = (100. / stats[0]);
 						for (long i = 1; i <= stats[0]; i++) {
-							long curPrim = Long.parseLong(bRead.readLine());
-							bWrite.write(curPrim + "\n");
-							int progtemp = (int) ((100 / corPrimDou) * i);
+							String curLine = bRead.readLine();
+							bWrite.write(curLine + "\n");
+							int progtemp = (int) (corPrimDou * i);
 							if (progtemp != progress) {
 								System.out.println("List repairing: " + progtemp + "%");
 								progress = progtemp;
@@ -161,5 +198,29 @@ public class Prim {
 	}
 	public static int JOptionDialog(String title, String hint, int message, Object[] options) {
 		return JOptionPane.showOptionDialog(null, hint, title, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
+	}
+	public static boolean isPrimWithList(long curTest, File primStorage) { //check if the input value is a prim
+		long sqrtNumber = (long) Math.sqrt(curTest);
+		if (primStorage.canRead()) {
+			try {
+				BufferedReader bRead = new BufferedReader(new FileReader(primStorage));
+				long curPrim = Long.parseLong(bRead.readLine());
+				while (curPrim <= sqrtNumber) {
+					//System.out.println(curTest + " % " + curPrim + " = " + (curTest % curPrim) + " (" + sqrtNumber + ")");
+					if (curTest % curPrim == 0) {
+						bRead.close();
+						return false;
+					}
+					curPrim = Long.parseLong(bRead.readLine());
+				}
+				bRead.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+		} else {
+			System.exit(0);
+		}
+		return true;
 	}
 }
