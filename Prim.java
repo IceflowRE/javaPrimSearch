@@ -45,6 +45,7 @@ public class Prim {
 				System.exit(0);
 			}
 			System.out.println("DONE: primelist recreating/ repairing");
+			stats = new long[] {2, 3, 1};
 		} else {
 			System.out.println("DONE: fast primeslist check");
 		}
@@ -66,6 +67,8 @@ public class Prim {
 			}
 		}
 		long biggestPrim = stats[1];
+		long curBiggestPrim = biggestPrim;
+		long sqrtValue;
 		if (biggestPrim == 2) { //prevent testing number 4
 			biggestPrim = 3;
 		} else { //prevent testing the same Prim again
@@ -74,9 +77,15 @@ public class Prim {
 		try {
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(primStorage, true));
 			for (long curTest = biggestPrim; curTest <= upTo; curTest += 2) { //biggestPrim + 2, because you dont want to test the biggest prim again
-				if (isPrimWithList(curTest, primStorage) == true) {
-					bWriter.write(curTest + "\n");
+				if ( ((sqrtValue = (long) Math.sqrt(curTest)) + 1) > curBiggestPrim) { //flush only of you need more prims in your pimStorage
 					bWriter.flush();
+					curBiggestPrim = biggestPrim;
+					System.out.println("flush at: " + curBiggestPrim);
+				}
+				//System.out.println(curTest + "--" + sqrtValue);
+				if (isPrimWithList(curTest, sqrtValue, primStorage) == true) {
+					bWriter.write(curTest + "\n");
+					biggestPrim = curTest;
 				}
 			}
 			bWriter.close();
@@ -114,15 +123,19 @@ public class Prim {
 			BufferedReader bRead = new BufferedReader(new FileReader(new File(relPath)));
 			String curLine = bRead.readLine();
 			long curPrim;
-			if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != 2)) {//first check
-				bRead.close();
+			try {
+				if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != 2)) {//first check
+					bRead.close();
+					return new long[] {correctPrim, biggestPrim, -2};
+				}
+				curLine = bRead.readLine();
+				if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != 3)) {//second check
+					bRead.close();
+					return new long[] {correctPrim, biggestPrim, -2};
+				} 
+			} catch (Exception e) {
 				return new long[] {correctPrim, biggestPrim, -2};
 			}
-			curLine = bRead.readLine();
-			if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != 3)) {//second check
-				bRead.close();
-				return new long[] {correctPrim, biggestPrim, -2};
-			} 
 			biggestPrim = 3;
 			for (correctPrim = 2; (curLine = bRead.readLine()) != null; correctPrim++) { //check if everything is ok
 				curPrim = Long.parseLong(curLine);
@@ -163,7 +176,7 @@ public class Prim {
 				choosen_temp = JOptionDialog("Prime list arent correct", "Try to repair it? (you will lose maybe some primes)", 2, new Object[] {"Yes", "No & Exit"});
 				if (choosen_temp == -1 || choosen_temp == 1) { //close
 					return false;
-				} else { //try to repair need work
+				} else { //try to repair
 					File copyTemp =  new File (dir + "/" + (file.substring(0, file.length() - 4)) + "copy.tmp");
 					try {
 						BufferedReader bRead = new BufferedReader(new FileReader(primStorage));
@@ -200,13 +213,12 @@ public class Prim {
 	public static int JOptionDialog(String title, String hint, int message, Object[] options) {
 		return JOptionPane.showOptionDialog(null, hint, title, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
 	}
-	public static boolean isPrimWithList(long curTest, File primStorage) { //check if the input value is a prim
-		long sqrtNumber = (long) Math.sqrt(curTest);
+	public static boolean isPrimWithList(long curTest, long sqrtValue, File primStorage) { //check if the input value is a prim
 		if (primStorage.canRead()) {
 			try {
 				BufferedReader bRead = new BufferedReader(new FileReader(primStorage));
 				long curPrim = Long.parseLong(bRead.readLine());
-				while (curPrim <= sqrtNumber) {
+				while (curPrim <= sqrtValue) {
 					//System.out.println(curTest + " % " + curPrim + " = " + (curTest % curPrim) + " (" + sqrtNumber + ")");
 					if (curTest % curPrim == 0) {
 						bRead.close();
