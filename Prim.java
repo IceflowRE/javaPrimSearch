@@ -16,7 +16,6 @@ public class Prim {
 		String dir = "data";
 		String file = "primes.txt";
 		File primStorage = new File(dir + "/" + file);
-
 		if (primStorage.exists()) { //filecheck
 			System.out.println("DONE: filescheck");
 		} else { //show message with option to create them
@@ -45,7 +44,6 @@ public class Prim {
 				System.exit(0);
 			}
 			System.out.println("DONE: primelist recreating/ repairing");
-			stats = new long[] {2, 3, 1};
 		} else {
 			System.out.println("DONE: fast primeslist check");
 		}
