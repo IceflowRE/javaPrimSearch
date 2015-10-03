@@ -5,6 +5,7 @@
 * 		- Thomas Mauch
 * 		- Apache License 2.0
 * 		- http://www.magicwerk.org/page-collections-overview.html
+* IDE: Eclipse Mars (Java)
 */
 
 import java.io.BufferedReader;
@@ -141,7 +142,7 @@ class Primes {
 				BufferedReader bReader = new BufferedReader(new FileReader(this.primStorage));
 				int progress = 0, progTemp;
 				double corPrimDou = (100. / this.correctPrim);
-				for (int i = 1; i <= this.correctPrim; i++) {
+				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(bReader.readLine() + "\n");
 					progTemp = (int) (corPrimDou * i);
 					if (progTemp != progress) {
@@ -187,7 +188,7 @@ class Primes {
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				int progress = 0, progTemp;
 				double corPrimDou = (100. / this.correctPrim);
-				for (int i = 1; i <= this.correctPrim; i++) {
+				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(this.primList.get(i) + "\n");
 					progTemp = (int) (corPrimDou * i);
 					if (progTemp != progress) {
@@ -266,7 +267,7 @@ class Primes {
 		return this.status;
 	}
 
-	// development methodes
+	//development methodes
 	public final void printBigList() {
 		System.out.println(this.primList);
 	}
