@@ -11,6 +11,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,6 +26,7 @@ class Primes {
 	private long correctPrim;
 	private long biggestPrim;
 	private int status;
+	private int lastWriteIndex;
 	
 	//constructor
 	public Primes(String dir, String file) {
@@ -32,7 +34,8 @@ class Primes {
 		this.primStorage = new File(dir + "/" + file);
 		this.correctPrim = 0;
 		this.biggestPrim = 0;
-		status = -2;
+		this.status = -2;
+		this.lastWriteIndex = 0;
 	}
 	
 	//methodes
@@ -51,6 +54,7 @@ class Primes {
 		} catch (Exception e) {
 			throw e;
 		}
+		this.status = 1;
 		return true;
 	}
 	public final boolean fastCheckPrimList() throws IOException { //long: 0 = correct prim; 1 = biggest prim; 2 = status (-2 = recreate all, -1 = error file need to be cutted, 1 = all ok)
@@ -83,6 +87,7 @@ class Primes {
 				primList.add(curPrim);
 			}
 			this.correctPrim = lReader.getLineNumber();
+			this.lastWriteIndex = lReader.getLineNumber();
 			lReader.close();
 		} catch (Exception e) {
 			this.correctPrim = 0;
@@ -123,6 +128,7 @@ class Primes {
 				this.primList.add(curPrim);
 			}
 			this.correctPrim = lReader.getLineNumber();
+			this.lastWriteIndex = lReader.getLineNumber();
 			lReader.close();
 		} catch (Exception e) {
 			this.correctPrim = 0;
@@ -137,11 +143,11 @@ class Primes {
 		String pathName = (this.primStorage.toString());
 		if (showProgress == true) {
 			try {
+				int progress = 0, progTemp;
+				double corPrimDou = (100. / this.correctPrim);
 				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				BufferedReader bReader = new BufferedReader(new FileReader(this.primStorage));
-				int progress = 0, progTemp;
-				double corPrimDou = (100. / this.correctPrim);
 				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(bReader.readLine() + "\n");
 					progTemp = (int) (corPrimDou * i);
@@ -184,10 +190,10 @@ class Primes {
 		String pathName = (this.primStorage.toString());
 		if (showProgress == true) {
 			try {
-				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
-				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				int progress = 0, progTemp;
 				double corPrimDou = (100. / this.correctPrim);
+				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
+				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(this.primList.get(i) + "\n");
 					progTemp = (int) (corPrimDou * i);
@@ -197,7 +203,7 @@ class Primes {
 					}
 				}
 				bWriter.close();
-				primStorage.delete();
+				this.primStorage.delete();
 				copyFile.renameTo(primStorage);
 				copyFile.delete();
 			} catch (Exception e) {
@@ -213,8 +219,8 @@ class Primes {
 					bWriter.write(i + "\n");
 				}
 				bWriter.close();
-				primStorage.delete();
-				copyFile.renameTo(primStorage);
+				this.primStorage.delete();
+				copyFile.renameTo(this.primStorage);
 				copyFile.delete();
 			} catch (Exception e) {
 				throw e;
@@ -223,13 +229,13 @@ class Primes {
 			return true;
 		}
 	}
-	public final boolean isPrimWithFile(long curTest, long sqrtValue, File primStorage) throws IOException { //check if the input value is a prim
-		if (primStorage.canRead()) {
+	public final boolean isPrimWithFile(long curTest) throws IOException { //dont forget flushing if the sqrtValue isnt in the list
+		long sqrtValue = (long) Math.sqrt(curTest);
+		if (this.primStorage.canRead()) {
 			try {
-				BufferedReader bRead = new BufferedReader(new FileReader(primStorage));
+				BufferedReader bRead = new BufferedReader(new FileReader(this.primStorage));
 				long curPrim = Long.parseLong(bRead.readLine());
 				while (curPrim <= sqrtValue) {
-					//System.out.println(curTest + " % " + curPrim + " = " + (curTest % curPrim) + " (" + sqrtNumber + ")");
 					if (curTest % curPrim == 0) {
 						bRead.close();
 						return false;
@@ -238,16 +244,83 @@ class Primes {
 				}
 				bRead.close();
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(0);
+				throw e;
 			}
 		} else {
-			System.exit(0);
+			throw new FileNotFoundException("File is not readable");
 		}
 		return true;
 	}
-	public final boolean isPrimWithBigList() {
-		return false;
+public final boolean isPrimWithBigList(long curTest) {
+		long sqrtValue = (long) Math.sqrt(curTest);
+		long curPrim = 0;
+		for (int i = 0; (curPrim = this.primList.get(i)) <= sqrtValue; i++) {
+			if (curTest % curPrim == 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+	public final boolean isPrim(long curTest) { //check if the input value is a prim
+		long sqrtValue = (long) Math.sqrt(curTest);
+		if (curTest % 2 == 0) {
+			return false;
+		}
+		for (long i = 3; i <= sqrtValue; i += 2) {
+			if (curTest % i == 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+	public final boolean writePrimStorage(boolean showProgress) throws IOException {
+		if (showProgress == true) {
+			try {
+				int progress = 0, progTemp;
+				double corPrimDou = (100. / this.correctPrim);
+				BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir()));
+				for (int i = this.lastWriteIndex; i <= (this.primList.size() - 1); i++) {
+					bWriter.write(this.primList.get(i) + "\n");
+					this.lastWriteIndex = (this.primList.size() - 1);
+					progTemp = (int) (corPrimDou * i);
+					if (progTemp != progress) {
+						System.out.println("List writing: " + progTemp + "%");
+						progress = progTemp;
+					}
+				}
+				bWriter.close();
+			} catch (Exception e) {
+				throw e;
+			}
+			return true;	
+		} else { //showProgress = off
+			try {
+				BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir()));
+				for (int i = this.lastWriteIndex; i <= (this.primList.size() - 1); i++) {
+					bWriter.write(this.primList.get(i) + "\n");
+					this.lastWriteIndex = (this.primList.size() - 1);
+				}
+				bWriter.close();
+			} catch (Exception e) {
+				throw e;
+			}
+			return true;	
+		}
+	}
+
+	//setter
+	public final boolean addPrim(long prim) {
+		try {
+			this.primList.add(prim);
+		} catch (Exception e) {
+			throw e;
+		}
+		return true;
+	}
+	public final boolean updateStats() {
+		this.correctPrim = this.primList.size();
+		this.biggestPrim = this.primList.getLast();
+		return true;
 	}
 
 	//getter
@@ -257,7 +330,7 @@ class Primes {
 		}
 		return false;
 	}
-		public final long getCorrectPrim() {
+	public final long getCorrectPrim() {
 		return this.correctPrim;
 	}
 	public final long getBiggestPrim() {
@@ -266,10 +339,4 @@ class Primes {
 	public final int getStatus() {
 		return this.status;
 	}
-
-	//development methodes
-	public final void printBigList() {
-		System.out.println(this.primList);
-	}
-	
 }

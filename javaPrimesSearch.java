@@ -63,10 +63,10 @@ public class javaPrimesSearch {
 		if (done_temp == true ) {
 			System.out.println("DONE: fast primes check/ loading  " + timerFormat(System.nanoTime() - time1));
 		} else { //error handling
-			System.out.println("FAILED: fast primes check/ loading  " + timerFormat(System.nanoTime() - time1));
+			System.out.println("FAILED: fast primes check/ loading (line: " + primObj.getCorrectPrim() + ")  " + timerFormat(System.nanoTime() - time1));
 			switch (primObj.getStatus()) {
 			case (-2): { //recreate file
-				int choosen_temp = JOptionDialog("Mistake in the primes file", "Try to repair it? (maybe you will lose some primes)", 2, new Object[] {"Yes", "No & Exit"});
+				int choosen_temp = JOptionDialog("Mistake in the primes file", "Try to recreate it? (you will lose all found primes)", 2, new Object[] {"Yes", "No & Exit"});
 				if (choosen_temp == -1 || choosen_temp == 1) { //close
 					System.out.println("CLOSED");
 					System.exit(0);
@@ -94,7 +94,7 @@ public class javaPrimesSearch {
 					}
 				} //end creating
 			} case (-1): { //repair file
-				int choosen_temp = JOptionDialog("Mistake in the primes file", "List should be repaired (you will lose all found primes)", 2, new Object[] {"Yes", "No & Exit"});
+				int choosen_temp = JOptionDialog("Mistake in the primes file", "List should be repaired (you will lose some found primes)", 2, new Object[] {"Yes", "No & Exit"});
 				if(choosen_temp == -1 || choosen_temp == 1) { //close
 					System.out.println("CLOSED");
 					System.exit(0);
@@ -123,13 +123,68 @@ public class javaPrimesSearch {
 				} //end repairing
 			}}
 		}
-		
-		{ //dev
-			System.out.println("Correct primes:  " + primObj.getCorrectPrim());
-			System.out.println("Biggest prime:  " + primObj.getBiggestPrim());
-			System.out.println("Status:  " + primObj.getStatus());
-			primObj.printBigList();
-		} //dev
+
+		System.out.println("Correct primes:  " + primObj.getCorrectPrim());
+		System.out.println("Biggest prime:  " + primObj.getBiggestPrim());
+
+		//ask how many numbers should be tested
+		long upTo = 0;
+		boolean inputIsCorrect = false;
+		while (!inputIsCorrect) {
+			try {
+				String input = JOptionPane.showInputDialog("Search from " + primObj.getBiggestPrim() + " up to X more numbers (bigger as 2)");
+				if (input == null) {
+					System.out.println("CLOSED");
+					System.exit(0);
+				}
+				if ( (upTo = Long.parseLong(input)) >= 2) {
+					upTo = (primObj.getBiggestPrim() + upTo);
+					inputIsCorrect = true;	
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Wrong input (or value to big)");
+			}
+		}
+
+		//search prims
+		System.out.println("START: test primes");
+		time1 = System.nanoTime();
+		try {
+			for (long i = primObj.getBiggestPrim() + 2; i <= upTo; i += 2) {
+				if (primObj.isPrimWithBigList(i) == true) {
+					primObj.addPrim(i);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("ERROR: test primes  " + timerFormat(System.nanoTime() - time1));
+			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished", 0, new Object[] {"Ok & Exit"});
+			System.out.println("CLOSED");
+			System.exit(0);
+		}		
+		System.out.println("DONE: test primes  " + timerFormat(System.nanoTime() - time1));
+
+		//updating stats
+		if (primObj.updateStats() == true) {
+			System.out.println("DONE: update stats");
+		}
+
+		//writing primes into the file
+		System.out.println("START: write primes into file");
+		time1 = System.nanoTime();
+		try {
+			if ( primObj.writePrimStorage(true) == true) {
+				System.out.println("DONE: write primes into file  " + timerFormat(System.nanoTime() - time1));
+			}
+		} catch (Exception e) {
+			System.out.println("ERROR: write primes into file  " + timerFormat(System.nanoTime() - time1));
+			JOptionDialog("Error", "An undetected problem occurred, writing primes into file isnt finished", 0, new Object[] {"Ok & Exit"});
+			System.out.println("CLOSED");
+			System.exit(0);
+		}
+
+		System.out.println("-------------------\nCorrect primes:  " + primObj.getCorrectPrim());
+		System.out.println("Biggest prime:  " + primObj.getBiggestPrim());
+		System.out.println("CLOSED");
 	} //end main
 	
 	//functions
