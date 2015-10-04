@@ -2,7 +2,7 @@
 
 This is my first "project" in Java, just search primes and save them.
 
-## Credits:
+## Credits
 - Author: Iceflower S
 - Thanks to: xnrand
 - Extern libraries:
