@@ -278,7 +278,7 @@ public final boolean isPrimWithBigList(long curTest) {
 		if (showProgress == true) {
 			try {
 				int progress = 0, progTemp;
-				double corPrimDou = (100. / this.correctPrim);
+				double corPrimDou = (100. / (this.correctPrim - this.primList.get(this.lastWriteIndex)));
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir()));
 				for (int i = this.lastWriteIndex; i <= (this.primList.size() - 1); i++) {
 					bWriter.write(this.primList.get(i) + "\n");
