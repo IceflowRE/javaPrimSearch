@@ -154,7 +154,7 @@ public class javaPrimesSearch {
 		}
 
 		//search prims
-		System.out.println("START: test primes");
+		System.out.println("START: test primes (" + primObj.getBiggestPrim() + " - " + upTo + ")");
 		time1 = System.nanoTime();
 		try {
 			for (long i = primObj.getBiggestPrim() + 2; i <= upTo; i += 2) {
@@ -164,7 +164,13 @@ public class javaPrimesSearch {
 			}
 		} catch (Exception e) {
 			System.out.println("ERROR: test primes  " + timerFormat(System.nanoTime() - time1));
-			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished", 0, new Object[] {"Ok & Exit"});
+			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok & Exit"});
+			try {
+				primObj.writePrimStorage(true);
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				System.out.println("ERROR: write primes into file");
+			}
 			System.out.println("CLOSED");
 			System.exit(0);
 		}		
