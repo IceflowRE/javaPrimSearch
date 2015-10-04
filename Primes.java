@@ -42,13 +42,12 @@ class Primes {
 	
 	//methodes
 	public final boolean recreateDir() throws IOException {
-		if (!this.primStorage.exists()) { //if primstorage.exists = false
+		if (!this.dirFile.exists()) { //if file not exists
 			if (!this.dirFile.mkdir()) { //if creating the file = false
 				return false;
 			}
 		}
 		try {
-			this.primStorage.delete();
 			this.primStorage.createNewFile();
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage));
 			bWriter.write("2" + "\n" + "3" + "\n");
