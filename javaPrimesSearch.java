@@ -1,3 +1,10 @@
+/*
+* Author: Iceflower S
+* IDE: Eclipse Mars (Java)
+* License: Copyright (C) 2015 Iceflower S
+* 	GPL: http://www.gnu.org/licenses/gpl.html
+*/
+
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 

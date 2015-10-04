@@ -6,6 +6,8 @@
 * 		- Apache License 2.0
 * 		- http://www.magicwerk.org/page-collections-overview.html
 * IDE: Eclipse Mars (Java)
+* License: Copyright (C) 2015 Iceflower S
+* 	GPL: http://www.gnu.org/licenses/gpl.html
 */
 
 import java.io.BufferedReader;
