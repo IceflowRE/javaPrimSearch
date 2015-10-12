@@ -162,19 +162,13 @@ public class javaPrimesSearch {
 					primObj.addPrim(i);
 				}
 			}
-		} catch (Exception e) {
+			System.out.println("DONE: test primes  " + timerFormat(System.nanoTime() - time1));
+		} catch (Throwable e) {
 			System.out.println("ERROR: test primes  " + timerFormat(System.nanoTime() - time1));
-			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok & Exit"});
-			try {
-				primObj.writePrimStorage(true);
-			} catch (Exception e2) {
-				e2.printStackTrace();
-				System.out.println("ERROR: write primes into file");
-			}
-			System.out.println("CLOSED");
-			System.exit(0);
+			e.printStackTrace();
+			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
+			//save the primes with the methods below
 		}		
-		System.out.println("DONE: test primes  " + timerFormat(System.nanoTime() - time1));
 
 		//updating stats
 		if (primObj.updateStats() == true) {
@@ -190,6 +184,7 @@ public class javaPrimesSearch {
 			}
 		} catch (Exception e) {
 			System.out.println("ERROR: write primes into file  " + timerFormat(System.nanoTime() - time1));
+			e.printStackTrace();
 			JOptionDialog("Error", "An undetected problem occurred, writing primes into file isnt finished", 0, new Object[] {"Ok & Exit"});
 			System.out.println("CLOSED");
 			System.exit(0);
