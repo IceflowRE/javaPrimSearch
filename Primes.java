@@ -47,11 +47,9 @@ class Primes {
 				return false;
 			}
 		}
-		try {
+		try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage)) ) {
 			this.primStorage.createNewFile();
-			BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage));
 			bWriter.write("2" + "\n" + "3" + "\n");
-			bWriter.close();
 		} catch (Exception e) {
 			throw e;
 		}
@@ -59,15 +57,13 @@ class Primes {
 		return true;
 	}
 	public final boolean fastCheckPrimList() throws IOException { //long: 0 = correct prim; 1 = biggest prim; 2 = status (-2 = recreate all, -1 = error file need to be cutted, 1 = all ok)
-		try {
-			LineNumberReader lReader = new LineNumberReader(new BufferedReader(new FileReader(this.primStorage)));
+		try ( LineNumberReader lReader = new LineNumberReader(new BufferedReader(new FileReader(this.primStorage))) ) {
 			long curPrim;
 			String curLine;
 			for (int i = 2; i <= 3; i++) { //test if the first is 2 and the second 3
 				curLine = lReader.readLine();
 				System.out.println(i);
 				if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != i)) {//first check
-					lReader.close();
 					this.correctPrim = 0;
 					this.biggestPrim = 0;
 					this.status = -2;
@@ -82,14 +78,12 @@ class Primes {
 				} else { //if one prim is smaller or equal as an previous throw an error
 					this.correctPrim = lReader.getLineNumber() - 1;
 					this.status = -1;
-					lReader.close();
 					return false;
 				}
 				primList.add(curPrim);
 			}
 			this.correctPrim = lReader.getLineNumber();
 			this.lastWriteIndex = lReader.getLineNumber();
-			lReader.close();
 		} catch (Exception e) {
 			this.correctPrim = 0;
 			this.biggestPrim = 0;
@@ -100,14 +94,13 @@ class Primes {
 		return true;
 	}
 	public final boolean fastCheckPrimStoreBigList() throws IOException { //long: 0 = correct prim; 1 = biggest prim; 2 = status (-2 = recreate all, -1 = error file need to be cutted, 1 = all ok)
-		try {
-			LineNumberReader lReader = new LineNumberReader(new BufferedReader(new FileReader(this.primStorage)));
+		try ( LineNumberReader lReader = new LineNumberReader(new BufferedReader(new FileReader(this.primStorage))) ) {
+			;
 			long curPrim;
 			String curLine;
 			for (int i = 2; i <= 3; i++) { //test if the first is 2 and the second 3
 				curLine = lReader.readLine();
 				if ( (curLine == null) || ((curPrim = Long.parseLong(curLine)) != i)) {//first check
-					lReader.close();
 					this.correctPrim = 0;
 					this.biggestPrim = 0;
 					this.status = -2;
@@ -123,14 +116,12 @@ class Primes {
 				} else { //if one prim is smaller or equal as an previous throw an error
 					this.correctPrim = lReader.getLineNumber() - 1;
 					this.status = -1;
-					lReader.close();
 					return false;
 				}
 				this.primList.add(curPrim);
 			}
 			this.correctPrim = lReader.getLineNumber();
 			this.lastWriteIndex = lReader.getLineNumber();
-			lReader.close();
 		} catch (Exception e) {
 			this.correctPrim = 0;
 			this.biggestPrim = 0;
@@ -142,13 +133,14 @@ class Primes {
 	}
 	public final boolean repairPrimListWithFile(boolean showProgress) throws IOException {
 		String pathName = (this.primStorage.toString());
+		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
-			try {
-				int progress = 0, progTemp;
-				double corPrimDou = (100. / this.correctPrim);
-				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
+			try (
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				BufferedReader bReader = new BufferedReader(new FileReader(this.primStorage));
+			) {
+				int progress = 0, progTemp;
+				double corPrimDou = (100. / this.correctPrim);
 				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(bReader.readLine() + "\n");
 					progTemp = (int) (corPrimDou * i);
@@ -158,7 +150,6 @@ class Primes {
 					}
 				}
 				bWriter.close();
-				bReader.close();
 				primStorage.delete();
 				copyFile.renameTo(primStorage);
 				copyFile.delete();
@@ -168,15 +159,14 @@ class Primes {
 			this.status = 1;
 			return true;
 		} else { //showProgress == false
-			try {
-				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
+			try (
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				BufferedReader bReader = new BufferedReader(new FileReader(this.primStorage));
+			) {
 				for (int i = 1; i <= this.correctPrim; i++) {
 					bWriter.write(bReader.readLine() + "\n");
 				}
 				bWriter.close();
-				bReader.close();
 				primStorage.delete();
 				copyFile.renameTo(primStorage);
 				copyFile.delete();
@@ -189,12 +179,11 @@ class Primes {
 	}
 	public final boolean repairPrimListWithBigList(boolean showProgress) throws IOException {
 		String pathName = (this.primStorage.toString());
+		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
-			try {
+			try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile)) ) {
 				int progress = 0, progTemp;
 				double corPrimDou = (100. / this.correctPrim);
-				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
-				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				for (int i = 0; i < this.correctPrim; i++) {
 					bWriter.write(this.primList.get(i) + "\n");
 					progTemp = (int) (corPrimDou * i);
@@ -213,9 +202,7 @@ class Primes {
 			this.status = 1;
 			return true;
 		} else { //showProgress == false
-			try {
-				File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
-				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
+			try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile)) ){
 				for (Long i : this.primList) {
 					bWriter.write(i + "\n");
 				}
@@ -276,32 +263,29 @@ public final boolean isPrimWithBigList(long curTest) {
 	}
 	public final boolean writePrimStorage(boolean showProgress) throws IOException {
 		if (showProgress == true) {
-			try {
+			try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir())) ){
 				int progress = 0, progTemp;
-				double corPrimDou = (100. / (this.correctPrim - this.primList.get(this.lastWriteIndex)));
-				BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir()));
-				for (int i = this.lastWriteIndex; i <= (this.primList.size() - 1); i++) {
+				int lastWriteIndexBefore = this.lastWriteIndex;
+				double corPrimDou = (100. / (this.correctPrim - this.lastWriteIndex));
+				for (int i = this.lastWriteIndex; i < this.correctPrim; i++) {
 					bWriter.write(this.primList.get(i) + "\n");
-					this.lastWriteIndex = (this.primList.size() - 1);
-					progTemp = (int) (corPrimDou * i);
+					this.lastWriteIndex = i;
+					progTemp = (int) (corPrimDou * (i - lastWriteIndexBefore));
 					if (progTemp != progress) {
 						System.out.println("List writing: " + progTemp + "%");
 						progress = progTemp;
 					}
 				}
-				bWriter.close();
 			} catch (Exception e) {
 				throw e;
 			}
 			return true;	
 		} else { //showProgress = off
-			try {
-				BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir()));
-				for (int i = this.lastWriteIndex; i <= (this.primList.size() - 1); i++) {
+			try (BufferedWriter bWriter = new BufferedWriter(new FileWriter(this.primStorage, this.existsDir())) ) {
+				for (int i = this.lastWriteIndex; i <= this.correctPrim; i++) {
 					bWriter.write(this.primList.get(i) + "\n");
-					this.lastWriteIndex = (this.primList.size() - 1);
+					this.lastWriteIndex = i;
 				}
-				bWriter.close();
 			} catch (Exception e) {
 				throw e;
 			}
