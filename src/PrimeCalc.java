@@ -25,7 +25,7 @@ public class PrimeCalc extends Main {
 		log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
 		long time1 = System.nanoTime();
 		try {
-			for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) {
+			for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) { //loop for testing the number and give them to the distributor which will test them with MT
 				distributor(i); //Multi
 				if (isCurTestPrime) { //Multi
 				//if (isPrimWithBigList(i) == true) { //single
@@ -40,7 +40,7 @@ public class PrimeCalc extends Main {
 		}
 	}
 
-	private final static void distributor(long curTest) { //alternative a fixed parts size; tests the number
+	private final static void distributor(long curTest) { //alternative a fixed parts size; tests the number like this easy e.g. test 800: the primlist is 80 large, so Thread1 will test primList 0-10, Thread2 11-20, and so on. the eachPart size is here 10
 		long useParts = 1; //DEV
 		int start;
 		int end;
