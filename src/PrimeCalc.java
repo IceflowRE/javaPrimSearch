@@ -40,7 +40,7 @@ public class PrimeCalc extends Main {
 		}
 	}
 
-	private static void distributor(long curTest) { //alternative a fixed parts size
+	private final static void distributor(long curTest) { //alternative a fixed parts size; tests the number
 		long useParts = 1; //DEV
 		int start;
 		int end;
@@ -53,14 +53,14 @@ public class PrimeCalc extends Main {
 		} else {
 			useParts = Main.maxParts;
 		}
-		System.out.println("MT starts" + curTest); //DEV
 		ExecutorService pool = Executors.newFixedThreadPool(Main.maxCalcThreads);
 		start = 0;
 		end = firstPart;
+		System.out.println("MT starts" + curTest); //DEV
 		Runnable worker = new PrimeDistributor(curTest, start, end);
 		pool.execute(worker);
 		for (int i = 1; i < useParts; i++) {
-			start = (end);
+			start = end;
 			end = (end + eachPart);
 			worker = new PrimeDistributor(curTest, start, end);
 			pool.execute(worker);
@@ -70,11 +70,8 @@ public class PrimeCalc extends Main {
 		while(!pool.isTerminated()) {
 			if (!isCurTestPrime) {
 				pool.shutdownNow();
-				break;
+				//break;
 			}
-		}
-		while(!pool.isTerminated()) { //needed? //DEV
-			
 		}
 		System.out.println("MT ends" + curTest); //DEV
 	}
@@ -127,7 +124,7 @@ public class PrimeCalc extends Main {
 	}	
 }
 
-class PrimeDistributor extends PrimeCalc implements Runnable {
+class PrimeDistributor extends Thread {
 	private long curTest;
 	private int start;
 	private long end;
@@ -136,16 +133,16 @@ class PrimeDistributor extends PrimeCalc implements Runnable {
 		this.curTest = curTest;
 		this.start = start;
 		this.end = end;
-		run();
 	}
 
 	@Override
-	public void run() {
+	public final void run() {
 		long curPrim = 0;
-		for (int i = start; (curPrim = Main.primList.get(i)) < end; i++) {
-			if (curTest % curPrim == 0) {
-				isCurTestPrime = false;
-				break;
+		for (int i = this.start; (curPrim = Main.primList.get(i)) <= this.end; i++) {
+			System.out.println(this.getName() + " - " + curPrim);
+			if (this.curTest % curPrim == 0) {
+				PrimeCalc.isCurTestPrime = false;
+				return;
 			}
 		}
 		return;
