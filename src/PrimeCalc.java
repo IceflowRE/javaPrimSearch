@@ -65,8 +65,11 @@ public class PrimeCalc {
 		while(!pool.isTerminated()) {
 			if (!isCurTestPrime) {
 				pool.shutdownNow();
-				//break;
+				break;
 			}
+		}
+		while(!pool.isShutdown()) { //needed?
+
 		}
 		System.out.println("MT ends" + curTest); //DEV
 	}
