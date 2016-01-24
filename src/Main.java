@@ -13,6 +13,8 @@
 import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
@@ -28,7 +30,6 @@ public class Main {
 	protected static int status;
 	protected static int lastWriteIndex;
 	protected static final int maxCalcThreads = 8;
-	protected static final int maxParts = 8; //how many numbers one thread can calc //DEV
 //storage - end
 
 	public static void main(String[] args) {
@@ -96,11 +97,11 @@ public class Main {
 		return JOptionPane.showOptionDialog(null, hint, title, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
 	}
 	
-	private static void checkInit() {
-		if (maxParts > maxCalcThreads) {
-			log("WARNING: Illegal settings (maximum of parts to calculate cannot lower as the maximum threads)");
-			//log("Closed");
-			//System.exit(0);
+	private static void checkInit() { //false configuration check
+		if (maxCalcThreads < 1) {
+			log("ERROR: Illegal settings (you have to use at least one thread)");
+			log("Closed");
+			System.exit(0);
 		}
 	}
 	

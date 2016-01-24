@@ -17,12 +17,12 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PrimeCalc extends Main {
+public class PrimeCalc {
 	
 	protected static boolean isCurTestPrime;
 	//search prims
 	static void searchPrimes(long upTo) {
-		log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
+		Main.log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
 		long time1 = System.nanoTime();
 		try {
 			for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) { //loop for testing the number and give them to the distributor which will test them with MT
@@ -32,37 +32,32 @@ public class PrimeCalc extends Main {
 					Main.primList.add(i);
 				}
 			}
-			log("DONE: test primes  " + timerFormat(System.nanoTime() - time1));
+			Main.log("DONE: test primes  " + Main.timerFormat(System.nanoTime() - time1));
 		} catch (Throwable e) {
-			log("ERROR: test primes  " + timerFormat(System.nanoTime() - time1));
+			Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
 			e.printStackTrace();
-			JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
+			Main.JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
 		}
 	}
 
 	private final static void distributor(long curTest) { //alternative a fixed parts size; tests the number like this easy e.g. test 800: the primlist is 80 large, so Thread1 will test primList 0-10, Thread2 11-20, and so on. the eachPart size is here 10
-		long useParts = 1; //DEV
+		int useThreads = 1;
 		int start;
-		int end;
-		isCurTestPrime = true; //if the number is a prim
-		int eachPart = (Main.primList.size() - (Main.primList.size() % Main.maxParts)) / Main.maxParts; // every thread get his own part of this size
-		int firstPart = eachPart + (Main.primList.size() % Main.maxParts);
-		if (Main.primList.size() < (Main.maxCalcThreads * Main.maxCalcThreads)) { //DEV
-			useParts = 1;
-			eachPart = Main.primList.size();
+		isCurTestPrime = true; //if the number is a prim, at start its a prim until you check its not a prime
+		if (Main.primList.size() < (Main.maxCalcThreads * Main.maxCalcThreads)) { //DEV // use MT only if there are enough index's, maybe later calc the best threads quantity until maxThreads which you are use
+			useThreads = 1;
 		} else {
-			useParts = Main.maxParts;
+			useThreads = Main.maxCalcThreads;
 		}
 		ExecutorService pool = Executors.newFixedThreadPool(Main.maxCalcThreads);
-		start = 0;
-		end = firstPart;
+		System.out.println(Main.primList);
 		System.out.println("MT starts" + curTest); //DEV
-		Runnable worker = new PrimeDistributor(curTest, start, end);
+		start = 0;
+		Runnable worker = new PrimeDistributor(curTest, start, useThreads); //init the first worker, at least there is every time one worker
 		pool.execute(worker);
-		for (int i = 1; i < useParts; i++) {
-			start = end;
-			end = (end + eachPart);
-			worker = new PrimeDistributor(curTest, start, end);
+		for (int i = 1; i < useThreads; i++) { // Main.maxCalcThreads = 3: thread1 tests: 0,3,6,9,... thread2 tests: 1,4,7,10,... thread3 tests: 2,5,8,11,...  (numbers are index of primList)
+			start = i;
+			worker = new PrimeDistributor(curTest, start, useThreads);
 			pool.execute(worker);
 		}
 		pool.shutdown();
@@ -127,21 +122,24 @@ public class PrimeCalc extends Main {
 class PrimeDistributor extends Thread {
 	private long curTest;
 	private int start;
-	private long end;
+	private int listSize;
+	private long useThreads;
 	
-	PrimeDistributor(long curTest, int start, long end) {
+	PrimeDistributor(long curTest, int start, long useThreads) {
 		this.curTest = curTest;
 		this.start = start;
-		this.end = end;
+		this.listSize = Main.primList.size();
+		this.useThreads = useThreads;
 	}
 
 	@Override
 	public final void run() {
 		long curPrim = 0;
-		for (int i = this.start; (curPrim = Main.primList.get(i)) <= this.end; i++) {
+		long sqrt = (long) Math.sqrt(curTest);
+		for (int i = this.start; (i < this.listSize) && ((curPrim = Main.primList.get(i)) <= sqrt); i += this.useThreads) {
 			System.out.println(this.getName() + " - " + curPrim);
 			if (this.curTest % curPrim == 0) {
-				PrimeCalc.isCurTestPrime = false;
+				PrimeCalc.isCurTestPrime = false; //change this boolean to shutdown all other threads via shutdownNow()
 				return;
 			}
 		}
