@@ -254,17 +254,19 @@ public class FileManager {
 		String pathName = (Main.primStorage.toString());
 		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
+			ConsolProgressBar cProgress = new ConsolProgressBar();
 			try (
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				BufferedReader bReader = new BufferedReader(new FileReader(Main.primStorage));
 			) {
-				int progress = 0, progTemp;
+				int progress = -1, progTemp = 0;
 				double corPrimDou = (100. / Main.correctPrim);
 				for (int i = 0; i < Main.correctPrim; i++) {
 					bWriter.write(bReader.readLine() + "\n");
 					progTemp = (int) (corPrimDou * i);
 					if (progTemp != progress) {
-						Main.log("List repairing: " + progTemp + "%");
+						//Main.log("List repairing: " + progTemp + "%");
+						Main.logAdd(cProgress.getProgress(progTemp));
 						progress = progTemp;
 					}
 				}
@@ -272,6 +274,7 @@ public class FileManager {
 				Main.primStorage.delete();
 				copyFile.renameTo(Main.primStorage);
 				copyFile.delete();
+				Main.log(cProgress.getProgress(100));
 			} catch (Exception e) {
 				throw e;
 			}
@@ -301,14 +304,16 @@ public class FileManager {
 		String pathName = (Main.primStorage.toString());
 		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
+			ConsolProgressBar cProgress = new ConsolProgressBar();
 			try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile)) ) {
-				int progress = 0, progTemp;
+				int progress = -1, progTemp = 0;
 				double corPrimDou = (100. / Main.correctPrim);
 				for (int i = 0; i < Main.correctPrim; i++) {
 					bWriter.write(Main.primList.get(i) + "\n");
 					progTemp = (int) (corPrimDou * i);
 					if (progTemp != progress) {
-						Main.log("List repairing: " + progTemp + "%");
+						//Main.log("List repairing: " + progTemp + "%");
+						Main.logAdd(cProgress.getProgress(progTemp));
 						progress = progTemp;
 					}
 				}
@@ -316,6 +321,7 @@ public class FileManager {
 				Main.primStorage.delete();
 				copyFile.renameTo(Main.primStorage);
 				copyFile.delete();
+				Main.log(cProgress.getProgress(100));
 			} catch (Exception e) {
 				throw e;
 			}
@@ -341,8 +347,9 @@ public class FileManager {
 	//writing
 	private final static boolean writePrimStorage(boolean showProgress) throws IOException {
 		if (showProgress == true) {
+			ConsolProgressBar cProgress = new ConsolProgressBar();
 			try (BufferedWriter bWriter = new BufferedWriter(new FileWriter(Main.primStorage, Main.primStorage.exists())) ){
-				int progress = 0, progTemp;
+				int progress = -1, progTemp = 0;
 				int lastWriteIndexBefore = Main.lastWriteIndex;
 				double corPrimDou = (100. / (Main.correctPrim - Main.lastWriteIndex));
 				for (int i = Main.lastWriteIndex; i < Main.correctPrim; i++) {
@@ -350,10 +357,12 @@ public class FileManager {
 					Main.lastWriteIndex = i;
 					progTemp = (int) (corPrimDou * (i - lastWriteIndexBefore));
 					if (progTemp != progress) {
-						Main.log("List writing: " + progTemp + "%");
+						//Main.log("List writing: " + progTemp + "%");
+						Main.logAdd(cProgress.getProgress(progTemp));
 						progress = progTemp;
 					}
 				}
+				Main.log(cProgress.getProgress(100));
 			} catch (Exception e) {
 				throw e;
 			}
@@ -369,5 +378,39 @@ public class FileManager {
 			}
 			return true;	
 		}
+	}
+}
+
+class ConsolProgressBar {
+	private boolean swap;
+	
+	public ConsolProgressBar() {
+		this.swap = false;
+	}
+	
+	public String getProgress(int percent) {
+		StringBuilder sBuilder = new StringBuilder("");
+		StringBuilder sBuilderSpace = new StringBuilder("");
+		if ((percent < 0) || (percent > 100)) {
+			this.swap = !this.swap;
+			if (swap) {
+				return "\r                    = =  = =                    ";
+			} else {
+				return "\r                     = == =                     ";
+			}
+		}
+		
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < (percent / 2); i++) {
+			sBuilder.append("=");
+		}
+		for (int i = 0; i < (51 - (percent / 2)); i++) {
+			sBuilderSpace.append(" ");
+		}
+		result.append("\r");
+		result.append(sBuilder.toString());
+		result.append(sBuilderSpace.toString());
+		result.append(percent + "%");
+		return result.toString();
 	}
 }

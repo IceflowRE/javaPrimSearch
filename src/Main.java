@@ -91,6 +91,10 @@ public class Main {
 		System.out.println(text);
 	}
 	
+	protected static final void logAdd(String text) {
+		System.out.print(text);
+	}
+	
 	protected static final String timerFormat(long nanosec) {
 		return new SimpleDateFormat("mm:ss.SSS").format(new Date((long) (nanosec * 1E-6)));
 	}
