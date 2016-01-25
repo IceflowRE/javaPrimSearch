@@ -44,14 +44,14 @@ public class PrimeCalc {
 		int useThreads = 1;
 		int start;
 		isCurTestPrime = true; //if the number is a prim, at start its a prim until you check its not a prime
-		if (Main.primList.size() < (Main.maxCalcThreads * Main.maxCalcThreads)) { //DEV // use MT only if there are enough index's, maybe later calc the best threads quantity until maxThreads which you are use
+		if (Main.primList.size() < Main.useMTifIndices) {// use MT only if there are enough index's, maybe later calc the best threads quantity until maxThreads which you are use
 			useThreads = 1;
 		} else {
 			useThreads = Main.maxCalcThreads;
 		}
 		ExecutorService pool = Executors.newFixedThreadPool(Main.maxCalcThreads);
-		System.out.println(Main.primList);
-		System.out.println("MT starts" + curTest); //DEV
+		System.out.println(Main.primList); //DEV
+		System.out.println("MT starts - " + curTest); //DEV
 		start = 0;
 		Runnable worker = new PrimeDistributor(curTest, start, useThreads); //init the first worker, at least there is every time one worker
 		pool.execute(worker);
@@ -64,14 +64,14 @@ public class PrimeCalc {
 		// Wait until all threads have finished
 		while(!pool.isTerminated()) {
 			if (!isCurTestPrime) {
-				pool.shutdownNow();
+				pool.shutdownNow(); //needed because of flag?
 				break;
 			}
 		}
-		while(!pool.isShutdown()) { //needed?
+		while(!pool.isTerminated()) { //needed?
 
 		}
-		System.out.println("MT ends" + curTest); //DEV
+		System.out.println("MT ends - " + curTest); //DEV
 	}
 	
 	private final static boolean isPrimWithFile(long curTest) throws IOException { //dont forget flushing if the sqrtValue isnt in the list
@@ -129,6 +129,9 @@ class PrimeDistributor extends Thread {
 	private long useThreads;
 	
 	PrimeDistributor(long curTest, int start, long useThreads) {
+		if (!PrimeCalc.isCurTestPrime) { //makes the shutdown faster
+			return;
+		}
 		this.curTest = curTest;
 		this.start = start;
 		this.listSize = Main.primList.size();
@@ -140,8 +143,12 @@ class PrimeDistributor extends Thread {
 		long curPrim = 0;
 		long sqrt = (long) Math.sqrt(curTest);
 		for (int i = this.start; (i < this.listSize) && ((curPrim = Main.primList.get(i)) <= sqrt); i += this.useThreads) {
-			System.out.println(this.getName() + " - " + curPrim);
+			System.out.println(this.getName() + " - " + curTest + " - " + curPrim);
+			if (!PrimeCalc.isCurTestPrime) { //makes the shutdown faster
+				return;
+			}
 			if (this.curTest % curPrim == 0) {
+				System.out.println("no prim");
 				PrimeCalc.isCurTestPrime = false; //change this boolean to shutdown all other threads via shutdownNow()
 				return;
 			}

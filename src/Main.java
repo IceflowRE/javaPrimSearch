@@ -30,6 +30,7 @@ public class Main {
 	protected static int status;
 	protected static int lastWriteIndex;
 	protected static final int maxCalcThreads = 8;
+	protected static final int useMTifIndices = maxCalcThreads * maxCalcThreads; //use MT when the primList has so much indices
 //storage - end
 
 	public static void main(String[] args) {
