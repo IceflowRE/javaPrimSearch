@@ -22,23 +22,37 @@ public class PrimeCalc {
 	protected static boolean isCurTestPrime;
 	//search prims
 	static void searchPrimes(long upTo) {
-		Main.log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
-		long time1 = System.nanoTime();
-		try {
-			for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) { //loop for testing the number and give them to the distributor which will test them with MT
-				if (isPrimWithBigList(i) == true) { //single
-					Main.primList.add(i);
+		if (Main.showProgressWhileCalc = true) {
+			showCalcProgress progressDaemon = new showCalcProgress(Main.biggestPrim, upTo);
+			try {
+				for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) { //loop for testing the number and give them to the distributor which will test them with MT
+					if (isPrimWithBigList(i) == true) { //single
+						Main.primList.add(i);
+					}
+					progressDaemon.update(i);
 				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+				throw new Exceptions.undetectedProblemException();
+			} finally {
+				progressDaemon.interrupt();
+				System.out.println();
 			}
-			Main.log("DONE: test primes  " + Main.timerFormat(System.nanoTime() - time1));
-		} catch (Throwable e) {
-			Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
-			e.printStackTrace();
-			Main.JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
+		} else { // showProgressWhileCalc = false
+			try {
+				for (long i = Main.biggestPrim + 2; i <= upTo; i += 2) { //loop for testing the number and give them to the distributor which will test them with MT
+					if (isPrimWithBigList(i) == true) { //single
+						Main.primList.add(i);
+					}
+				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+				throw new Exceptions.undetectedProblemException();
+			}
 		}
 	}
 	
-	private final static boolean isPrimWithFile(long curTest) throws IOException { //dont forget flushing if the sqrtValue isnt in the list
+	private final static boolean isPrimWithFile(long curTest) throws IOException { //unused //dont forget flushing if the sqrtValue isnt in the list
 		long sqrtValue = (long) Math.sqrt(curTest);
 		if (Main.primStorage.canRead()) {
 			try {
@@ -72,7 +86,7 @@ public class PrimeCalc {
 		return true;
 	}
 	
-	private final static boolean isPrim(long curTest) { // classic check of primes
+	private final static boolean isPrim(long curTest) { //unused // classic check of primes
 		long sqrtValue = (long) Math.sqrt(curTest);
 		if (curTest % 2 == 0) {
 			return false;
@@ -84,4 +98,22 @@ public class PrimeCalc {
 		}
 		return true;
 	}	
+}
+
+class showCalcProgress extends Thread {
+
+	private long start;
+	private double factor;
+	private ConsoleProgressBar conPBar;
+	
+	public showCalcProgress(long biggestPrim, long upTo) {
+		this.setDaemon(true);
+		this.start = biggestPrim;
+		this.factor = 100. / (upTo - biggestPrim);
+		this.conPBar = new ConsoleProgressBar();
+	}
+	
+	public void update(long curPrim) {
+		System.out.print(conPBar.getProgress((int) (this.factor * (curPrim  - this.start))) );
+	}
 }

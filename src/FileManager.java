@@ -254,7 +254,7 @@ public class FileManager {
 		String pathName = (Main.primStorage.toString());
 		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
-			ConsolProgressBar cProgress = new ConsolProgressBar();
+			ConsoleProgressBar cProgress = new ConsoleProgressBar();
 			try (
 				BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile));
 				BufferedReader bReader = new BufferedReader(new FileReader(Main.primStorage));
@@ -304,7 +304,7 @@ public class FileManager {
 		String pathName = (Main.primStorage.toString());
 		File copyFile = new File(pathName.substring(0, pathName.length() - 4) + "copy.tmp");
 		if (showProgress == true) {
-			ConsolProgressBar cProgress = new ConsolProgressBar();
+			ConsoleProgressBar cProgress = new ConsoleProgressBar();
 			try ( BufferedWriter bWriter = new BufferedWriter(new FileWriter(copyFile)) ) {
 				int progress = -1, progTemp = 0;
 				double corPrimDou = (100. / Main.correctPrim);
@@ -347,7 +347,7 @@ public class FileManager {
 	//writing
 	private final static boolean writePrimStorage(boolean showProgress) throws IOException {
 		if (showProgress == true) {
-			ConsolProgressBar cProgress = new ConsolProgressBar();
+			ConsoleProgressBar cProgress = new ConsoleProgressBar();
 			try (BufferedWriter bWriter = new BufferedWriter(new FileWriter(Main.primStorage, Main.primStorage.exists())) ){
 				int progress = -1, progTemp = 0;
 				int lastWriteIndexBefore = Main.lastWriteIndex;
@@ -378,39 +378,5 @@ public class FileManager {
 			}
 			return true;	
 		}
-	}
-}
-
-class ConsolProgressBar {
-	private boolean swap;
-	
-	public ConsolProgressBar() {
-		this.swap = false;
-	}
-	
-	public String getProgress(int percent) {
-		StringBuilder sBuilder = new StringBuilder("");
-		StringBuilder sBuilderSpace = new StringBuilder("");
-		if ((percent < 0) || (percent > 100)) {
-			this.swap = !this.swap;
-			if (swap) {
-				return "\r                    = =  = =                    ";
-			} else {
-				return "\r                     = == =                     ";
-			}
-		}
-		
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < (percent / 2); i++) {
-			sBuilder.append("=");
-		}
-		for (int i = 0; i < (51 - (percent / 2)); i++) {
-			sBuilderSpace.append(" ");
-		}
-		result.append("\r");
-		result.append(sBuilder.toString());
-		result.append(sBuilderSpace.toString());
-		result.append(percent + "%");
-		return result.toString();
 	}
 }

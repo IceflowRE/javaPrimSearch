@@ -30,28 +30,42 @@ public class Main {
 	protected static int status;
 	protected static int lastWriteIndex;
 	protected static final int maxCalcThreads = 8;
-	protected static final int useMTifIndices = maxCalcThreads * maxCalcThreads; //use MT when the primList has so much indices
+	protected static boolean showProgressWhileCalc;
 //storage - end
 
 	public static void main(String[] args) {
 		checkInit();
 		//init vars/ objects
+		showProgressWhileCalc = true; //needs more performance
+		
 		correctPrim = 0;
 		biggestPrim = 0;
 		status = -2;
 		lastWriteIndex = 0;
 		
-		FileManager.fileCheck();
-		FileManager.checkPrimes();
+		FileManager.fileCheck(); // methode
+		FileManager.checkPrimes(); // methode
 		
 		log("Correct primes:  " + correctPrim);
 		log("Biggest prime:  " + biggestPrim);
 		
 		long upTo = calcHowMany();
-		PrimeCalc.searchPrimes(upTo);
-		updateStats();
+		log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
+		long time1 = System.nanoTime();
+		try {
+			PrimeCalc.searchPrimes(upTo); // methode
+			log("DONE: test primes  " + Main.timerFormat(System.nanoTime() - time1));
+		} catch (Exceptions.undetectedProblemException e) {
+			log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
+			Main.JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
+			updateStats(); // methode
+			FileManager.writeFiles(); // methode
+		}
 		
-		FileManager.writeFiles();
+		updateStats(); // methode
+		
+		
+		FileManager.writeFiles(); // methode
 		
 		log("-------------------");
 		log("Correct primes:  " + correctPrim);
