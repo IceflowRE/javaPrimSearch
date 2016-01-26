@@ -19,7 +19,7 @@ public class PrimeCalc {
 	protected static boolean isCurTestPrime;
 	//search prims
 	static void searchPrimes(long upTo) throws Exception {
-		Main.log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
+		Main.log("START: test primes (" + Main.decimalFormat.format(Main.biggestPrim) + " - " + Main.decimalFormat.format(upTo) + ")");
 		long time1 = System.nanoTime();
 		
 		if (Main.showProgressWhileCalc = true) {
@@ -41,7 +41,7 @@ public class PrimeCalc {
 			} catch (Exception e) { //TODO: add out of memory exception
 				Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
 				Main.log("\t" + e.getStackTrace());
-				throw new Exception("An undetected problem occurred, test primes isnt finished");
+				throw new Exception("An undetected problem occurred, test primes isnt finished.");
 			} finally {
 				progressDaemon.interrupt();
 				System.out.println();
@@ -56,7 +56,7 @@ public class PrimeCalc {
 			} catch (Exception e) { //TODO: add out of memory exception
 				Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
 				Main.log("\t"+ e.getStackTrace());
-				throw new Exception("An undetected problem occurred, test primes isnt finished");
+				throw new Exception("An undetected problem occurred, test primes isnt finished.");
 			}
 		}
 		

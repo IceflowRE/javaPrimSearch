@@ -12,6 +12,7 @@
 
 import java.io.File;
 import java.sql.Date;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JOptionPane;
@@ -25,6 +26,7 @@ public class Main {
 	protected static final File dirFile = new File("data"); //path to data
 	protected static final File primStorage = new File("data/primes.txt"); //path includes data
 	protected static BigList<Long> primList = new BigList<Long>();
+	protected static DecimalFormat decimalFormat = new DecimalFormat("###,###");
 	protected static long correctPrim;
 	protected static long biggestPrim;
 	protected static int status;
@@ -57,8 +59,8 @@ public class Main {
 		//prim check
 		FileManager.checkPrimes(); // methode
 		
-		log("Correct primes:  " + correctPrim);
-		log("Biggest prime:  " + biggestPrim);
+		log("Found primes:  " + decimalFormat.format(correctPrim));
+		log("Biggest prime:  " + decimalFormat.format(biggestPrim));
 		
 		long upTo = calcHowMany();
 		try {
@@ -81,8 +83,8 @@ public class Main {
 		}
 		
 		log("-------------------");
-		log("Correct primes:  " + correctPrim);
-		log("Biggest prime:  " + biggestPrim);
+		log("Found primes:  " + decimalFormat.format(correctPrim));
+		log("Biggest prime:  " + decimalFormat.format(biggestPrim));
 		log("CLOSED");
 	}
 	
@@ -93,8 +95,8 @@ public class Main {
 			try {
 				String input = JOptionPane.showInputDialog("Search from " + biggestPrim + " up to X more numbers (bigger as 2)");
 				if (input == null) {
-					Main.log("User canceled");
-					System.out.println("CLOSED");
+					log("User canceled");
+					log("CLOSED");
 					System.exit(0);
 				}
 				if ( (upTo = Long.parseLong(input)) >= 2) {
@@ -102,7 +104,7 @@ public class Main {
 					inputIsCorrect = true;
 				}
 			} catch (NumberFormatException e) {
-				System.out.println("Wrong input (or value to big)");
+				log("Wrong input");
 			}
 		}
 		return upTo;
