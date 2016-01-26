@@ -11,17 +11,17 @@
 */
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class PrimeCalc {
 	
 	protected static boolean isCurTestPrime;
 	//search prims
-	static void searchPrimes(long upTo) {
+	static void searchPrimes(long upTo) throws Exception {
+		Main.log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
+		long time1 = System.nanoTime();
+		
 		if (Main.showProgressWhileCalc = true) {
 			showCalcProgress progressDaemon = new showCalcProgress(Main.biggestPrim, upTo);
 			try {
@@ -31,9 +31,17 @@ public class PrimeCalc {
 					}
 					progressDaemon.update(i);
 				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-				throw new Exceptions.undetectedProblemException();
+				
+				if (false) { //prevent Unreachable catch block for IOException if isPrimWithFile() is not used (atm no option for it)
+					throw new IOException();
+				}
+			} catch (IOException e) { //for isPrimWithFile()
+				Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
+				throw e;
+			} catch (Exception e) { //TODO: add out of memory exception
+				Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
+				Main.log("\t" + e.getStackTrace());
+				throw new Exception("An undetected problem occurred, test primes isnt finished");
 			} finally {
 				progressDaemon.interrupt();
 				System.out.println();
@@ -45,32 +53,33 @@ public class PrimeCalc {
 						Main.primList.add(i);
 					}
 				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-				throw new Exceptions.undetectedProblemException();
+			} catch (Exception e) { //TODO: add out of memory exception
+				Main.log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
+				Main.log("\t"+ e.getStackTrace());
+				throw new Exception("An undetected problem occurred, test primes isnt finished");
 			}
 		}
+		
+		Main.log("DONE: test primes  " + Main.timerFormat(System.nanoTime() - time1));
 	}
 	
+	@SuppressWarnings("unused")
 	private final static boolean isPrimWithFile(long curTest) throws IOException { //unused //dont forget flushing if the sqrtValue isnt in the list
 		long sqrtValue = (long) Math.sqrt(curTest);
 		if (Main.primStorage.canRead()) {
-			try {
-				BufferedReader bRead = new BufferedReader(new FileReader(Main.primStorage));
+			try ( BufferedReader bRead = new BufferedReader(new FileReader(Main.primStorage)) ) {
 				long curPrim = Long.parseLong(bRead.readLine());
 				while (curPrim <= sqrtValue) {
 					if (curTest % curPrim == 0) {
-						bRead.close();
 						return false;
 					}
 					curPrim = Long.parseLong(bRead.readLine());
 				}
-				bRead.close();
 			} catch (Exception e) {
 				throw e;
 			}
 		} else {
-			throw new FileNotFoundException("File is not readable");
+			throw new IOException("File is not readable");
 		}
 		return true;
 	}
@@ -86,6 +95,7 @@ public class PrimeCalc {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private final static boolean isPrim(long curTest) { //unused // classic check of primes
 		long sqrtValue = (long) Math.sqrt(curTest);
 		if (curTest % 2 == 0) {

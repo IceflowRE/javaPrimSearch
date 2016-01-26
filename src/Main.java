@@ -13,12 +13,12 @@
 import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
 import org.magicwerk.brownies.collections.BigList;
+
+import Exceptions.WriteFileException;
 
 public class Main {
 //storage
@@ -33,6 +33,14 @@ public class Main {
 	protected static boolean showProgressWhileCalc;
 //storage - end
 
+	private static void checkInit() { //false configuration check
+		if (maxCalcThreads < 1) {
+			log("ERROR: Illegal settings (you have to use at least one thread)");
+			log("Closed");
+			System.exit(0);
+		}
+	}
+	
 	public static void main(String[] args) {
 		checkInit();
 		//init vars/ objects
@@ -43,29 +51,34 @@ public class Main {
 		status = -2;
 		lastWriteIndex = 0;
 		
+		//file check
 		FileManager.fileCheck(); // methode
+		
+		//prim check
 		FileManager.checkPrimes(); // methode
 		
 		log("Correct primes:  " + correctPrim);
 		log("Biggest prime:  " + biggestPrim);
 		
 		long upTo = calcHowMany();
-		log("START: test primes (" + Main.biggestPrim + " - " + upTo + ")");
-		long time1 = System.nanoTime();
 		try {
 			PrimeCalc.searchPrimes(upTo); // methode
-			log("DONE: test primes  " + Main.timerFormat(System.nanoTime() - time1));
-		} catch (Exceptions.undetectedProblemException e) {
-			log("ERROR: test primes  " + Main.timerFormat(System.nanoTime() - time1));
-			Main.JOptionDialog("Error", "An undetected problem occurred, test primes isnt finished\ntry to save the found primes", 0, new Object[] {"Ok"});
-			updateStats(); // methode
-			FileManager.writeFiles(); // methode
+		} catch (Exception e) {
+			Main.JOptionDialog("Error", e.getMessage(), 0, new Object[] {"Ok"});
+			//updateStats(); // methode
+			//FileManager.writeFiles(); // methode
+			//System.exit(0);
 		}
 		
 		updateStats(); // methode
 		
-		
-		FileManager.writeFiles(); // methode
+		try {
+			FileManager.writeFiles(); // methode
+		} catch (WriteFileException e) {
+			Main.JOptionDialog("Error", e.getMessage(), 0, new Object[] {"Ok & Exit"});
+			Main.log("CLOSED");
+			System.exit(0);
+		}
 		
 		log("-------------------");
 		log("Correct primes:  " + correctPrim);
@@ -96,9 +109,9 @@ public class Main {
 	}
 	
 	private static final void updateStats() {
-		Main.correctPrim = Main.primList.size();
-		Main.biggestPrim = Main.primList.getLast();
-		Main.log("DONE: update stats");
+		correctPrim = Main.primList.size();
+		biggestPrim = Main.primList.getLast();
+		log("DONE: update statistic");
 	}
 
 	protected static final void log(String text) {
@@ -115,15 +128,7 @@ public class Main {
 	protected static final int JOptionDialog(String title, String hint, int message, Object[] options) {
 		return JOptionPane.showOptionDialog(null, hint, title, JOptionPane.DEFAULT_OPTION, message, null, options, options[0]);
 	}
-	
-	private static void checkInit() { //false configuration check
-		if (maxCalcThreads < 1) {
-			log("ERROR: Illegal settings (you have to use at least one thread)");
-			log("Closed");
-			System.exit(0);
-		}
-	}
-	
+		
 	protected static synchronized long getPrim(int get) { //DEV, not in use
 		return primList.get(get);
 	}
