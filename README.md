@@ -1,4 +1,9 @@
 # javaPrimesSearch
+![maintained](https://img.shields.io/badge/maintained-no-red.svg)
+![Programming Language](https://img.shields.io/badge/language-Java-orange.svg)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+---
 
 This is my first "project" in Java, just search primes and save them.
 
@@ -12,8 +17,8 @@ This is my first "project" in Java, just search primes and save them.
     - http://www.magicwerk.org/page-collections-overview.html
 - IDE: Eclipse Mars (Java)
 
-##License
-Copyright  ©  2015  Iceflower S
+## License
+Copyright © 2015 - now Iceflower S
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
